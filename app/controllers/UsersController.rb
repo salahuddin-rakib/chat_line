@@ -19,12 +19,10 @@ class UsersController < ApplicationController
     if @user.blank?
       render json: { message: 'User not found.' }, status: 404
     elsif @user.authenticate(params[:password])
-      token = JsonWebToken.encode(user_id: @user.id)
-      time = Time.now + 24.hours.to_i
+      token = JsonWebToken.login_token_encode(@user)
       render json: { message: 'Successfully logged in.', token: token,
-                     exp: time.strftime("%m-%d-%Y %H:%M"), username: @user.full_name }, status: :ok
+                     username: @user.full_name }, status: :ok
     else
-      Rails.logger.info "\nElse block\n"
       render json: { error: 'Unauthorized.' }, status: :unauthorized
     end
   rescue => error

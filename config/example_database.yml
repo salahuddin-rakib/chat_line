@@ -11,7 +11,7 @@ default: &default
 
 development:
   <<: *default
-  database: chat_line_backend_development
+  database:  <%= ENV["DATABASE_NAME"] %>
 
 test:
   <<: *default

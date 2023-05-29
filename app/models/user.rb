@@ -2,9 +2,10 @@ class User < ApplicationRecord
   # Adding password encryption using Bcrypt
   has_secure_password
 
-  #Associations:
+  # Associations:
   has_many :messages, as: :from_user, class_name: 'Message'
   has_many :messages, as: :to_user, class_name: 'Message'
+  has_one :auth_token
 
   # Validations:
   validates :full_name, presence: true
