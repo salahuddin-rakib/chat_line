@@ -1,4 +1,4 @@
 class Message < ApplicationRecord
-  belongs_to :from_user
-  belongs_to :to_user
+  belongs_to :from_user, polymorphic: true
+  belongs_to :to_user, polymorphic: true
 end
