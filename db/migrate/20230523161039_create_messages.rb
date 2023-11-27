@@ -5,7 +5,7 @@ class CreateMessages < ActiveRecord::Migration[7.0]
       t.string :from_user_type
       t.integer :to_user_id
       t.string :to_user_type
-      t.integer :read_state
+      t.integer :read_state, default: 0
       t.string :message_text
 
       t.timestamps

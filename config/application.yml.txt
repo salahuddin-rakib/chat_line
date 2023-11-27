@@ -1,0 +1,2 @@
+SECRET_KEY: "20ea4889721893af3a140412bb2dc49a9ef726"
+DATABASE_NAME: "chat_line_backend_development"

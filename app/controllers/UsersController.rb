@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   before_action :authorize_request, except: [:create, :login]
-  before_action :find_user, only: [:update, :messages]
+  before_action :find_user, only: [:update, :messages, :create_message]
 
   def create
     user = User.find_by_email(registration_params[:email])
@@ -57,19 +57,25 @@ class UsersController < ApplicationController
     offset = page * limit
 
     messages = Message.where('from_user_id = :id OR to_user_id = :id', id: @user.id)
-    messages = messages.limit(limit).offset(offset).map do |message|
-      {
-        id: message.id,
-        text: message.message_text,
-        sender: message.from_user&.full_name || '',
-        sender_type: message.from_user&.user_type,
-        sender_id: message.from_user_id,
-      }
-    end
-    render json: { success: true, message: 'Successfully fetched messages.', messages: messages }, status: :ok
+    response = fetch_message_response(messages.limit(limit).offset(offset))
+    render json: { success: true, message: 'Successfully fetched messages.', response: response }, status: :ok
   rescue => error
     Rails.logger.info "\nUnable to fetch users due to: #{error.message}\n"
-    render json: { success: false, message: 'Unable to fetch messages.' }, status: 200
+    render json: { success: false, message: 'Unable to fetch messages.' }, status: 422
+  end
+
+  def create_message
+    if @current_user == @user
+      render json: { success: false, message: "You won't be able to send message to yourself." }, status: 200
+    else
+      Message.create!(from_user: @current_user, to_user: @user, message_text: params[:message])
+      messages = Message.where('from_user_id = :id OR to_user_id = :id', id: @user.id)
+      response = fetch_message_response(messages.limit(10).offset(0))
+      render json: { success: true, message: 'Successfully created messages.', response: response }, status: :ok
+    end
+  rescue => error
+    Rails.logger.info "\nUnable to create message due to: #{error.message}\n"
+    render json: { success: false, message: 'Unable to create message.' }, status: 422
   end
 
   def update
@@ -89,6 +95,18 @@ class UsersController < ApplicationController
 
   def permitted_params
     params.permit(:admin_id, :user_type, :status, :full_name, :email, :phone_number, :profile_photo)
+  end
+
+  def fetch_message_response(messages)
+    messages.map do |message|
+      {
+        id: message.id,
+        text: message.message_text,
+        sender: message.from_user&.full_name || '',
+        sender_type: message.from_user&.user_type,
+        sender_id: message.from_user_id,
+      }
+    end
   end
 
   def find_user

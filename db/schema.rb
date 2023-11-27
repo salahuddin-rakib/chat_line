@@ -28,7 +28,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_29_152153) do
     t.string "from_user_type"
     t.integer "to_user_id"
     t.string "to_user_type"
-    t.integer "read_state"
+    t.integer "read_state", default: 0
     t.string "message_text"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
